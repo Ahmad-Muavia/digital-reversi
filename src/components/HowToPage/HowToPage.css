@@ -1,0 +1,9 @@
+.howto-page-icon {
+  display: flex;
+  color: var(--accent);
+}
+
+.howto-page-icon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}

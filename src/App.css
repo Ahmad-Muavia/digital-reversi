@@ -1,0 +1,157 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Brand ---------- */
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  color: var(--text-strong);
+}
+
+.brand-mark {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--accent);
+}
+
+/* ---------- Typography helpers ---------- */
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--eyebrow);
+}
+
+.lead {
+  margin: 0;
+  color: var(--muted);
+}
+
+.rule {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: var(--border);
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-strong);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.button:hover {
+  background: var(--secondary);
+}
+
+.button svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.button--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.button--primary:hover {
+  background: color-mix(in oklch, var(--accent) 88%, black);
+}
+
+.button--large {
+  min-height: 2.75rem;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.95rem;
+}
+
+.button--block {
+  width: 100%;
+}
+
+.button--danger,
+.button--danger:hover {
+  border-color: var(--error);
+  background: var(--error);
+  color: var(--accent-text);
+}
+
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--text-strong);
+}
+
+.link-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.app-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* ---------- Simple single-column pages (setup, how to play) ---------- */
+
+.page {
+  width: min(100%, 44rem);
+  margin: 0 auto;
+  padding: 2.5rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.page-head h2 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 2.4rem);
+  line-height: 1.15;
+}

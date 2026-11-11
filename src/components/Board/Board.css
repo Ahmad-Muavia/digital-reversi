@@ -1,0 +1,137 @@
+.board-frame {
+  /* Fits the viewport on phones, up to 76 px squares on desktop */
+  --cell: min(calc((100vw - 4.5rem) / 8), 76px);
+  --label: 1.5rem;
+  display: grid;
+  grid-template-columns: var(--label) auto;
+  grid-template-rows: var(--label) auto;
+  grid-template-areas:
+    '. cols'
+    'rows board';
+  column-gap: 0.4rem;
+  row-gap: 0.25rem;
+}
+
+.board-frame--preview {
+  --cell: min(calc((100vw - 5rem) / 8), 46px);
+  grid-template-columns: auto;
+  grid-template-rows: auto;
+  grid-template-areas: 'board';
+}
+
+.board-frame--preview .board-labels {
+  display: none;
+}
+
+.board-labels {
+  display: grid;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  user-select: none;
+}
+
+.board-labels span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-labels--cols {
+  grid-area: cols;
+  grid-template-columns: repeat(8, var(--cell));
+  column-gap: 1px;
+  padding: 0 2px;
+}
+
+.board-labels--rows {
+  grid-area: rows;
+  grid-template-rows: repeat(8, var(--cell));
+  row-gap: 1px;
+  padding: 2px 0;
+}
+
+/* Grid lines are the 1px gaps showing the line colour behind the squares */
+.board {
+  grid-area: board;
+  display: grid;
+  grid-template-rows: repeat(8, var(--cell));
+  gap: 1px;
+  border: 2px solid color-mix(in oklch, var(--board) 80%, black);
+  background: var(--board-line);
+  box-shadow: var(--shadow-lg);
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(8, var(--cell));
+  gap: 1px;
+}
+
+.board-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--board);
+}
+
+.board-cell-button {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.board-cell-button:hover {
+  background: rgb(255 255 255 / 0.07);
+}
+
+.board-cell-button[aria-disabled='true'] {
+  cursor: default;
+}
+
+.board-cell-button[aria-disabled='true']:hover {
+  background: none;
+}
+
+.board-cell.is-last-move {
+  box-shadow: inset 0 0 0 3px var(--legal);
+}
+
+/* Gold dot with a soft halo, as in the design */
+.legal-hint {
+  display: block;
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+  background: var(--legal);
+  box-shadow: 0 0 0 0.35rem color-mix(in oklch, var(--legal) 25%, transparent);
+}
+
+.board-cell-button:focus-visible {
+  outline: 3px solid var(--disc-white);
+  outline-offset: -4px;
+}
+
+.disc {
+  display: block;
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.35),
+    inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  transition: background-color 0.25s;
+}
+
+.disc--black {
+  background: var(--disc-black);
+}
+
+.disc--white {
+  background: var(--disc-white);
+}

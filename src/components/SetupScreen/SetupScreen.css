@@ -1,0 +1,174 @@
+.setup {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.setup-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.setup-group legend,
+.setup-field label {
+  display: block;
+  margin-bottom: 0.6rem;
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+/* ---------- Mode cards ---------- */
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.choice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.1rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.choice-card:hover {
+  border-color: var(--accent);
+}
+
+.choice-card:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--secondary);
+}
+
+.choice-card input,
+.segment input {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0.1rem 0 0;
+  accent-color: var(--accent);
+}
+
+.choice-icon {
+  display: flex;
+  color: var(--accent);
+}
+
+.choice-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.choice-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.choice-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ---------- Names ---------- */
+
+.setup-names {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.25rem;
+}
+
+.setup-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.setup-field input {
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-strong);
+  box-shadow: var(--shadow);
+}
+
+.setup-field input::placeholder {
+  color: var(--muted);
+}
+
+.setup-field input[aria-invalid='true'] {
+  border-color: var(--error);
+}
+
+.setup-error {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--error);
+}
+
+/* ---------- Segmented choices (difficulty, session length) ---------- */
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface);
+  color: var(--text-strong);
+  cursor: pointer;
+}
+
+.segment:hover {
+  border-color: var(--accent);
+}
+
+.segment:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--secondary);
+  font-weight: 600;
+}
+
+.setup-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---------- Actions ---------- */
+
+.setup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
