@@ -9,7 +9,7 @@
  * Usage:
  *   npm run build && npm run preview          # serves on http://localhost:4173
  *   npm run test:e2e -- http://localhost:4173/ [screenshotDir]
- *   npm run test:e2e -- https://ahmad-muavia.github.io/digital-reversi/
+ *   npm run test:e2e -- https://digital-reversi.vercel.app/
  *
  * Set CHROME_PATH if Chrome/Edge is not in a standard location.
  * Needs Node 22+ (built-in fetch and WebSocket). Exit code 1 if any check fails.

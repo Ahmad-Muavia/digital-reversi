@@ -17,7 +17,7 @@ Versions are the ones locked in `package-lock.json`.
 
 | Tool | Version | What it does in this game |
 | --- | --- | --- |
-| **Vite** | 8.3 | Development server with instant reload (`npm run dev`) and the production build (`npm run build` → `dist/`). It also bundles the AI Web Worker as its own file. Configured in `vite.config.ts` (`base: './'` so the site works on GitHub Pages). |
+| **Vite** | 8.3 | Development server with instant reload (`npm run dev`) and the production build (`npm run build` → `dist/`). It also bundles the AI Web Worker as its own file. Configured in `vite.config.ts` (`base: './'` so the site works at any URL, including Vercel preview links). |
 | **@vitejs/plugin-react** | 6.3 | Lets Vite compile React's JSX and enables fast refresh while editing. |
 | **Node.js + npm** | Node 22.22+ / 24.15+ / 26+ | Runs the tooling and installs packages. `package-lock.json` pins exact versions so every install is identical. |
 
@@ -41,9 +41,8 @@ Versions are the ones locked in `package-lock.json`.
 | **Git** | Version control. Each Jira story is a feature branch; history shows every change. |
 | **GitHub** | Hosts the repository and Pull Requests. Every change is reviewed in a PR before it reaches `main`. |
 | **GitHub CLI (`gh`)** | Used to open Pull Requests from the terminal. |
-| **GitHub Actions — CI** (`.github/workflows/ci.yml`) | On every PR and push to `main`: install, lint, test with coverage, build — on Node 22 and 24. |
-| **GitHub Actions — Deploy** (`.github/workflows/deploy.yml`) | On every push to `main`: test, build and publish the game to GitHub Pages. |
-| **GitHub Pages** | Hosts the playable game as a static website. |
+| **GitHub Actions — CI** (`.github/workflows/ci.yml`) | On every PR and push to `main`: install, lint, test with coverage, build — on Node 22 and 24 — then the real-browser check in headless Chrome. |
+| **Vercel** | Hosts the playable game at https://digital-reversi.vercel.app. Connected to the GitHub repository: each merge to `main` is built and published, and each Pull Request gets its own preview link. |
 | **Jira** (Kanban board, project BOAR) | Tracks epics, user stories, subtasks and bugs across the four sprints. See [JIRA_PLAN.md](JIRA_PLAN.md). |
 
 ## How the code is organised

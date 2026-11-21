@@ -2,7 +2,7 @@
 
 A browser-based Reversi game built with React, TypeScript and Vite.
 
-**Play online:** https://ahmad-muavia.github.io/digital-reversi/
+**Play online:** https://digital-reversi.vercel.app
 
 ## Features
 
@@ -86,7 +86,7 @@ headless Chrome on every push and pull request:
 ```bash
 npm run build && npm run preview                         # http://localhost:4173
 npm run test:e2e -- http://localhost:4173/               # in a second terminal
-npm run test:e2e -- https://ahmad-muavia.github.io/digital-reversi/   # live site
+npm run test:e2e -- https://digital-reversi.vercel.app/  # live site
 # To use Edge, set CHROME_PATH to msedge.exe first, e.g. in PowerShell:
 # $env:CHROME_PATH = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 ```
@@ -96,16 +96,17 @@ sprint and defects found.
 
 ## Deployment
 
-The app is deployed to GitHub Pages by
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on every push
-to `main` (and can be run manually from the Actions tab). The workflow runs
-the tests, builds the site and publishes `dist/`.
+The game is hosted on **Vercel**, which is connected to this GitHub repository:
 
-One-time setup: in the repository's **Settings → Pages**, set **Source** to
-**GitHub Actions**.
+- **Production:** every merge to `main` is built (`npm run build`) and published
+  to https://digital-reversi.vercel.app.
+- **Previews:** every pull request gets its own preview link, posted on the PR,
+  so the team can try a change before it is merged.
+
+Merges should only happen once CI is green, so production always runs a tested build.
 
 The build uses relative asset paths (`base: './'` in `vite.config.ts`), so the
-same `dist/` folder also works on any static host or sub-path.
+same `dist/` folder also works on any other static host or sub-path.
 
 ## Continuous integration
 

@@ -90,10 +90,19 @@ At #16, `npm run test:coverage` was run three times in a row and passed 179/179 
 | Always-true assertions (`draws >= 0`, `discs <= 64`) and a "board is locked" check that any finished game would pass | Review of the tests | Replaced with exact disc counts, at least one draw, and checks that the board is disabled and shows no error |
 | Duplicate tests and a copied random-number helper with a precision bug | Review of the tests | Duplicates removed; one exact `seeded()` helper in `testUtils.ts` |
 | `ai.worker.ts` had 0% coverage; real-browser check not run in CI | Coverage report, CI review | Worker tests added; CI job runs the real-browser check in Chrome |
+| GitHub Pages URL in the docs returned 404; the Pages deploy workflow failed on every push | Checking the live links | Hosting moved to Vercel (already connected); docs and Jira updated; `deploy.yml` removed |
 
 ## Real-browser results
 
-After the test-suite review, build served locally with `vite preview`, 21 November 2026: **28/28** in Chrome (Windows 11). The check now also runs in CI on every push and pull request (headless Chrome on Ubuntu).
+After the test-suite review, 21 November 2026, headless Chrome (Windows 11):
+
+| Target | Result |
+| --- | --- |
+| Build served locally with `vite preview` | **28/28** |
+| Live site on Vercel (https://digital-reversi.vercel.app) | **28/28** |
+| CI (headless Chrome on Ubuntu), PR #1 | **28/28** |
+
+The check now runs in CI on every push and pull request.
 
 At #19 (new design), build served locally with `vite preview`, 11 November 2026:
 
@@ -120,5 +129,5 @@ In the full game against Hard the computer replied 30 times, each within
 
 - [x] Play in a real browser, desktop and phone widths: automated by the real-browser check, screenshots reviewed
 - [x] Play against Hard and check for Web Worker errors: automated (no console errors; worker loaded)
-- [x] GitHub Pages site loads and is playable: real-browser check run against the live URL
+- [x] Live site on Vercel loads and is playable: real-browser check 28/28 against https://digital-reversi.vercel.app (21 November 2026)
 - [ ] Try the board with a screen reader (NVDA on Windows / VoiceOver on macOS): needs a person
