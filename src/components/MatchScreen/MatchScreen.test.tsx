@@ -28,7 +28,7 @@ describe('describeLastMove', () => {
   })
 
   it('uses the plural for several flips', () => {
-    const game = { ...playMove(createInitialGameState(), { row: 2, col: 3 }) }
+    const game = playMove(createInitialGameState(), { row: 2, col: 3 })
     const withTwo = { ...game, lastFlips: [...game.lastFlips, { row: 0, col: 0 }] }
     expect(describeLastMove(withTwo, names)).toBe('Ada played d3 and flipped 2 discs.')
   })
@@ -172,8 +172,13 @@ describe('MatchScreen top bar', () => {
     const user = userEvent.setup()
     const onHelp = vi.fn()
     render(<MatchScreen config={config} onEndSession={() => {}} onHelp={onHelp} />)
+    await user.click(screen.getByRole('button', { name: /^d3,/ }))
+    const before = screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))
+
     await user.click(screen.getByRole('button', { name: 'How to play' }))
     expect(onHelp).toHaveBeenCalledTimes(1)
-    expect(screen.getByText('Black makes the first move.')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Ben to move')
+    expect(screen.getAllByTestId('disc')).toHaveLength(5)
+    expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(before)
   })
 })

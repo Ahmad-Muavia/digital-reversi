@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { countDiscs, createInitialBoard, positionLabel } from './board'
+import { countDiscs, createInitialBoard } from './board'
 import {
   IllegalMoveError,
   applyMove,
@@ -207,12 +207,11 @@ describe('playMove', () => {
       expect(guard).toBeLessThanOrEqual(60)
     }
     const { black, white } = countDiscs(state.board)
-    expect(black + white).toBeLessThanOrEqual(64)
+    expect(black + white).toBe(4 + guard) // every move adds exactly one disc
     expect(state.moveCount).toBe(guard)
     expect(state.outcome).toBe(getOutcome({ black, white }))
     expect(getLegalMoves(state.board, 'black')).toEqual([])
     expect(getLegalMoves(state.board, 'white')).toEqual([])
-    expect(positionLabel(state.lastMove!)).toMatch(/^[a-h][1-8]$/)
   })
 })
 

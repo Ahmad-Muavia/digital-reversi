@@ -4,6 +4,7 @@ import { answerRequest } from '../ai'
 import type { AiMoveRequest, AiProvider } from '../ai'
 import { getLegalMoves } from '../game'
 import type { PlayerId, PlayerInfo, Position, SessionConfig } from '../game'
+import { seeded } from '../game/testUtils'
 import { gameIdOf, initMatchView, matchReducer, useMatch } from './useMatch'
 import type { MatchViewState } from './useMatch'
 
@@ -77,12 +78,8 @@ describe('matchReducer', () => {
   })
 
   it('records every forced pass with the player who passed', () => {
-    // Seeded random games until several passes have happened
-    let seed = 7
-    const rand = () => {
-      seed = (seed * 1103515245 + 12345) % 2 ** 31
-      return seed / 2 ** 31
-    }
+    // Seeded random games, enough for several passes to happen
+    const rand = seeded(7)
     let seen = 0
     let recorded = 0
     for (let g = 0; g < 40; g++) {
@@ -139,28 +136,8 @@ describe('matchReducer against the computer', () => {
     expect(next.view.game.moveCount).toBe(2)
   })
 
-  it.each([
-    ['an old revision', { revision: 0 }],
-    ['a future revision', { revision: 2 }],
-    ['another game', { gameId: 'other-g1' }],
-    ['an illegal square', { position: at('a1') }],
-  ])('ignores an AI move for %s', (_, override) => {
-    const state = computerToMove()
-    const action = {
-      type: 'aiMove' as const,
-      position: at('c3'),
-      gameId: gameIdOf(state),
-      revision: 1,
-      ...override,
-    }
-    expect(matchReducer(state, action)).toBe(state)
-  })
-
-  it('ignores AI moves on a human turn', () => {
-    const state = initMatchView(vsComputer)
-    const action = { type: 'aiMove' as const, position: at('d3'), gameId: gameIdOf(state), revision: 0 }
-    expect(matchReducer(state, action)).toBe(state)
-  })
+  // Stale, foreign, illegal and wrong-turn AI moves are covered by the NFR09
+  // tests in src/ai/contract.test.ts, so they are not repeated here.
 
   it('gives each session its own game ids, so earlier replies never match', () => {
     expect(gameIdOf(initMatchView(vsComputer))).not.toBe(gameIdOf(initMatchView(vsComputer)))
@@ -317,23 +294,37 @@ describe('useMatch against the computer', () => {
     }
   })
 
-  it('drops the computer move if the session ends while it thinks', async () => {
-    let resolveReply: (r: unknown) => void = () => {}
-    let pending: AiMoveRequest | undefined
-    const provider: AiProvider = (request) => {
-      pending = request
+  // Ending the session unmounts the hook, which runs the same effect cleanup as
+  // a cancelled request. The hook stays mounted here so the result is observable:
+  // after unmount `result.current` is frozen and would pass even if the cancel
+  // check were missing.
+  it('drops a reply that arrives after its request was cancelled', async () => {
+    let resolveFirst: (r: unknown) => void = () => {}
+    let firstRequest: AiMoveRequest | undefined
+    const first: AiProvider = (request) => {
+      firstRequest = request
       return new Promise((resolve) => {
-        resolveReply = resolve
+        resolveFirst = resolve
       })
     }
+    const silent: AiProvider = () => new Promise(() => {})
     const config = vsComputer()
-    const { result, unmount } = renderHook(() =>
-      useMatch(config, { aiDelayMs: 0, aiProvider: provider }),
+    const { result, rerender } = renderHook(
+      ({ provider }) => useMatch(config, { aiDelayMs: 0, aiProvider: provider }),
+      { initialProps: { provider: first } },
     )
     act(() => result.current.play(at('d3')))
-    expect(pending).toBeDefined()
-    unmount() // End session
-    await act(async () => resolveReply(answerRequest(pending!)))
+    expect(firstRequest).toBeDefined()
+
+    // Cancel the in-flight request (a new provider re-runs the effect)
+    rerender({ provider: silent })
+    // The old reply is valid for the current game and revision, so only the
+    // cancel check stops it from being applied
+    await act(async () => {
+      resolveFirst(answerRequest(firstRequest!))
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
     expect(result.current.game.moveCount).toBe(1)
+    expect(result.current.isComputerTurn).toBe(true)
   })
 })

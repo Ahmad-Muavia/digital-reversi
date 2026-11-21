@@ -71,16 +71,17 @@ docs/          Tech stack, testing report, Jira and sprint plan
 
 ## Testing
 
-254 automated tests (Vitest, React Testing Library, jsdom) cover the rules
+253 automated tests (Vitest, React Testing Library, jsdom) cover the rules
 (including perft counts matching the published Othello values and 200 random
-complete games), the AI and its contract (30 injected bad replies, two
-interchangeable providers), state management, components and full user flows.
-Coverage is about 98%, and CI enforces thresholds.
+complete games), the AI, its Web Worker and its contract (30 injected bad
+replies, two interchangeable providers), state management, components and full
+user flows. Coverage is about 99%, and CI enforces thresholds.
 
 A separate real-browser check plays the game in headless Chrome or Edge:
 the landing page, setup validation, a two-player game, keyboard play, How to play, End session, a full
 game against Hard with the AI in a Web Worker, phone-width layout, and no
-console errors (28 checks; passes in both Chrome and Edge):
+console errors (28 checks; passes in both Chrome and Edge). CI runs it in
+headless Chrome on every push and pull request:
 
 ```bash
 npm run build && npm run preview                         # http://localhost:4173

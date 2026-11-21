@@ -53,11 +53,13 @@ All numbers are from actual runs of `npm test` on each branch before its PR was 
 | 4 | #17 Browser check + final docs | 179 |
 | 4 | #18 D3 alignment | 249 |
 | 4 | #19 New design (Lovable) | 254 |
+| 4 | Test-suite review | 253 |
 
 Coverage at #11: statements 98.86%, branches 98.22%, functions 98.83%, lines 99.33%.
 Coverage at #16: statements 97.73%, branches 97.77%, functions 97.08%, lines 98.16% (the worker client and timeout fallback added a few defensive lines).
 Coverage at #18: statements 98.14%, branches 97.46%, functions 97.85%, lines 98.44%.
 Coverage at #19: statements 98.41%, branches 97.66%, functions 98.70%, lines 98.72%.
+Coverage after the test-suite review: statements 99.20%, branches 97.66%, functions 99.35%, lines 99.63% (the Web Worker entry point is now tested).
 
 CI on GitHub (Node 22 and 24) passed for every PR from #11 on, and on `main` after merging.
 At #16, `npm run test:coverage` was run three times in a row and passed 179/179 each time.
@@ -82,8 +84,16 @@ At #16, `npm run test:coverage` was run three times in a row and passed 179/179 
 | Game did not follow D3 for session length, name rules, End session confirmation, the AI contract, AI failure handling and pass records | Line-by-line comparison with D3 | Implemented; see [D3_TRACEABILITY.md](D3_TRACEABILITY.md) |
 | An AI reply was not checked against the legal list; an illegal reply would have left the game stuck | D3 comparison (REQ-AI-02) | Adapter validates every reply; failures show Retry (#18) |
 | Real-browser check left headless Edge processes and its profile behind | Process check after running it in Edge | Close the browser through the DevTools Protocol, with a process-tree kill as a fallback (#18) |
+| **Test-suite review:** | | |
+| NFR09 bad-reply tests checked a state object nothing could change, so "no change" was never really tested | Review of the tests | Each bad reply now goes through the real hook; board, turn and results are checked, and so is the rejection reason |
+| "Drops the computer move" test read the hook after unmount, when its value is frozen | Review of the tests | Test keeps the hook mounted, cancels the request and delivers the stale reply |
+| Always-true assertions (`draws >= 0`, `discs <= 64`) and a "board is locked" check that any finished game would pass | Review of the tests | Replaced with exact disc counts, at least one draw, and checks that the board is disabled and shows no error |
+| Duplicate tests and a copied random-number helper with a precision bug | Review of the tests | Duplicates removed; one exact `seeded()` helper in `testUtils.ts` |
+| `ai.worker.ts` had 0% coverage; real-browser check not run in CI | Coverage report, CI review | Worker tests added; CI job runs the real-browser check in Chrome |
 
 ## Real-browser results
+
+After the test-suite review, build served locally with `vite preview`, 21 November 2026: **28/28** in Chrome (Windows 11). The check now also runs in CI on every push and pull request (headless Chrome on Ubuntu).
 
 At #19 (new design), build served locally with `vite preview`, 11 November 2026:
 

@@ -1,7 +1,8 @@
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { createInitialBoard, getLegalMoves } from '../game'
+import { countDiscs, createInitialBoard, getLegalMoves } from '../game'
 import type { SessionConfig } from '../game'
-import { gameIdOf, initMatchView, matchReducer } from '../hooks/useMatch'
+import { gameIdOf, initMatchView, matchReducer, useMatch } from '../hooks/useMatch'
 import type { MatchViewState } from '../hooks/useMatch'
 import { answerRequest } from './aiClient'
 import {
@@ -14,7 +15,7 @@ import {
   toIndex,
   validateReply,
 } from './contract'
-import type { AiMoveRequest, AiProvider } from './contract'
+import type { AiProvider } from './contract'
 
 const opening = () =>
   buildRequest({
@@ -97,56 +98,62 @@ describe('NFR09: thirty bad AI replies are rejected without any change', () => {
   }
 
   /** Human has played d3; the computer (white) is to move at revision 1. */
-  function computerTurn(): { state: MatchViewState; request: AiMoveRequest } {
+  function computerTurn(): { state: MatchViewState } {
     const state = matchReducer(initMatchView(vsComputer), {
       type: 'move',
       position: { row: 2, col: 3 },
     })
-    const request = buildRequest({
-      board: state.view.game.board,
-      player: 'white',
-      difficulty: 'easy',
-      requestId: 'req-live',
-      gameId: gameIdOf(state),
-      revision: 1,
-    })
-    return { state, request }
+    return { state }
   }
 
-  const id = 'req-live'
-  // Replies checked by the adapter (I-AI-REPLY)
-  const badReplies: [string, unknown][] = [
-    ['wrong id', { requestId: 'req-other', cellIndex: 18 }],
-    ['old id', { requestId: 'req-0', cellIndex: 18 }],
-    ['empty id', { requestId: '', cellIndex: 18 }],
-    ['numeric id', { requestId: 1, cellIndex: 18 }],
-    ['missing id', { cellIndex: 18 }],
-    ['null', null],
-    ['string', 'c3'],
-    ['number', 18],
-    ['array', [18]],
-    ['no cell index', { requestId: id }],
-    ['cell index as text', { requestId: id, cellIndex: '18' }],
-    ['fractional index', { requestId: id, cellIndex: 18.5 }],
-    ['NaN index', { requestId: id, cellIndex: Number.NaN }],
-    ['negative index', { requestId: id, cellIndex: -1 }],
-    ['index 64', { requestId: id, cellIndex: 64 }],
-    ['index 1000', { requestId: id, cellIndex: 1000 }],
-    ['occupied d4', { requestId: id, cellIndex: 27 }],
-    ['occupied d3', { requestId: id, cellIndex: 19 }],
-    ['empty non-capturing a1', { requestId: id, cellIndex: 0 }],
-    ['empty non-capturing h8', { requestId: id, cellIndex: 63 }],
-    ['provider error', { requestId: id, error: 'internal_error' }],
-    ['claimed outcome', { requestId: id, winner: 'W' }],
-    ['pass while moves exist', { requestId: id, pass: true }],
+  const ID = 'reply for a different request'
+  const MALFORMED = 'malformed reply'
+  const NOT_INT = 'cell index is not an integer'
+  const RANGE = 'cell index out of range'
+  const ILLEGAL = 'not a legal move'
+
+  // Replies checked by the adapter (I-AI-REPLY). Each one is built from the real
+  // request id, so it is rejected for its own fault, not for a mismatched id.
+  const badReplies: [string, (id: string) => unknown, string][] = [
+    ['wrong id', () => ({ requestId: 'req-other', cellIndex: 18 }), ID],
+    ['old id', () => ({ requestId: 'req-0', cellIndex: 18 }), ID],
+    ['empty id', () => ({ requestId: '', cellIndex: 18 }), ID],
+    ['numeric id', () => ({ requestId: 1, cellIndex: 18 }), ID],
+    ['missing id', () => ({ cellIndex: 18 }), ID],
+    ['null', () => null, MALFORMED],
+    ['string', () => 'c3', MALFORMED],
+    ['number', () => 18, MALFORMED],
+    ['array', () => [18], MALFORMED],
+    ['no cell index', (id) => ({ requestId: id }), NOT_INT],
+    ['cell index as text', (id) => ({ requestId: id, cellIndex: '18' }), NOT_INT],
+    ['fractional index', (id) => ({ requestId: id, cellIndex: 18.5 }), NOT_INT],
+    ['NaN index', (id) => ({ requestId: id, cellIndex: Number.NaN }), NOT_INT],
+    ['negative index', (id) => ({ requestId: id, cellIndex: -1 }), RANGE],
+    ['index 64', (id) => ({ requestId: id, cellIndex: 64 }), RANGE],
+    ['index 1000', (id) => ({ requestId: id, cellIndex: 1000 }), RANGE],
+    ['occupied d4', (id) => ({ requestId: id, cellIndex: 27 }), ILLEGAL],
+    ['occupied d3', (id) => ({ requestId: id, cellIndex: 19 }), ILLEGAL],
+    ['empty non-capturing a1', (id) => ({ requestId: id, cellIndex: 0 }), ILLEGAL],
+    ['empty non-capturing h8', (id) => ({ requestId: id, cellIndex: 63 }), ILLEGAL],
+    ['provider error', (id) => ({ requestId: id, error: 'internal_error' }), 'provider error: internal_error'],
+    ['claimed outcome', (id) => ({ requestId: id, winner: 'W' }), NOT_INT],
+    ['pass while moves exist', (id) => ({ requestId: id, pass: true }), NOT_INT],
   ]
 
-  it.each(badReplies)('rejects a reply: %s', async (_, reply) => {
-    const { state, request } = computerTurn()
-    const result = await requestAiMove(async () => reply, request)
-    expect(result.ok).toBe(false)
-    // Nothing reaches the rules engine, so the game is unchanged
-    expect(state.view.game.moveCount).toBe(1)
+  // Runs the real path: the hook asks the provider, the adapter validates the
+  // reply, and only a valid reply may reach the rules engine.
+  it.each(badReplies)('rejects a reply: %s', async (_, makeReply, reason) => {
+    const provider: AiProvider = async (request) => makeReply(request.requestId)
+    const { result } = renderHook(() => useMatch(vsComputer, { aiDelayMs: 0, aiProvider: provider }))
+    act(() => result.current.play({ row: 2, col: 3 }))
+    const board = result.current.game.board
+    const match = result.current.match
+
+    await waitFor(() => expect(result.current.aiError).toBe(reason))
+    expect(result.current.game.board).toBe(board)
+    expect(result.current.game.moveCount).toBe(1)
+    expect(result.current.game.currentPlayer).toBe('white')
+    expect(result.current.match).toBe(match)
   })
 
   // Moves that passed the adapter but are no longer current (checked by the platform)
@@ -246,8 +253,10 @@ describe('NFR08: interchangeable AI providers', () => {
     const state = await playFullGame(provider)
     expect(state.view.game.status).toBe('finished')
     expect(state.match.history).toHaveLength(1)
+    // The recorded score is the final board, and every move added exactly one disc
+    expect(state.match.history[0].score).toEqual(countDiscs(state.view.game.board))
     const { black, white } = state.match.history[0].score
-    expect(black + white).toBeLessThanOrEqual(64)
+    expect(black + white).toBe(4 + state.view.game.moveCount)
   })
 
   it.each([

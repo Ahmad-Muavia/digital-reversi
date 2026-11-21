@@ -145,12 +145,4 @@ describe('Board', () => {
     await user.keyboard('x')
     expect(document.activeElement).toHaveAccessibleName('d4, white disc')
   })
-
-  it('supports keyboard activation of squares', async () => {
-    const onCellClick = vi.fn()
-    render(<Board board={createInitialBoard()} onCellClick={onCellClick} />)
-    screen.getByRole('button', { name: 'f5, empty' }).focus()
-    await userEvent.keyboard('{Enter}')
-    expect(onCellClick).toHaveBeenCalledWith({ row: 4, col: 5 })
-  })
 })

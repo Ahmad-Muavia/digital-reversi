@@ -25,7 +25,7 @@ Versions are the ones locked in `package-lock.json`.
 
 | Tool | Version | What it does in this game |
 | --- | --- | --- |
-| **Vitest** | 5.1 | Runs the automated tests (`npm test`): rules, AI, React hooks and components. 254 tests across 18 files. |
+| **Vitest** | 5.1 | Runs the automated tests (`npm test`): rules, AI, React hooks and components. 253 tests across 19 files. |
 | **@vitest/coverage-v8** | 5.1 | Measures which lines the tests exercise (`npm run test:coverage`). CI fails if coverage drops below 95% (90% for branches). |
 | **jsdom** | 31.0 | A simulated browser inside Node so component tests can render the board and click squares without a real browser. |
 | **React Testing Library** | 16.3 | Renders components in tests and finds elements the way users do — by role and accessible name (e.g. the button "d3, empty, legal move"). This also checks the game is usable with a screen reader. |
