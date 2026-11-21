@@ -136,13 +136,17 @@ describe('App', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Game over: Ada wins, 13–0.')
     expect(screen.queryAllByRole('button', { name: /legal move/ })).toHaveLength(0)
-    
+
     const results = screen.getByRole('region', { name: 'Results' })
     const rows = within(results).getAllByRole('row')
     expect(rows[1]).toHaveTextContent(/1\s*Ada\s*Ben\s*13–0\s*Ada/)
 
-    // board is locked
+    // The board is locked: every square is disabled and a click is ignored
+    // without the "not a legal move" message an unlocked board would show
+    expect(screen.getByRole('grid', { name: 'Reversi board' })).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByRole('grid', { name: 'Reversi board' }).querySelectorAll('button:not([aria-disabled="true"])')).toHaveLength(0)
     await user.click(square('a1'))
+    expect(screen.getByRole('alert')).toBeEmptyDOMElement()
     expect(scores()).toEqual(['Ada: 13', 'Ben: 0'])
 
     await user.click(screen.getByRole('button', { name: 'Next game' }))

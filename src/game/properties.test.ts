@@ -6,15 +6,8 @@ import { describe, expect, it } from 'vitest'
 import { countDiscs, opponentOf } from './board'
 import { createInitialGameState, getOutcome, playMove } from './game'
 import { getLegalMoves, hasLegalMove } from './rules'
+import { seeded } from './testUtils'
 import type { Board, GameState } from './types'
-
-function seeded(seed: number) {
-  let s = seed >>> 0
-  return () => {
-    s = (s * 1664525 + 1013904223) >>> 0
-    return s / 2 ** 32
-  }
-}
 
 function diff(before: Board, after: Board) {
   const changed: { row: number; col: number }[] = []
@@ -95,6 +88,6 @@ describe('random complete games', () => {
     // The random games should exercise the rarer paths too
     expect(passes).toBeGreaterThan(0)
     expect(earlyEnds).toBeGreaterThan(0)
-    expect(draws).toBeGreaterThanOrEqual(0)
+    expect(draws).toBeGreaterThan(0)
   })
 })

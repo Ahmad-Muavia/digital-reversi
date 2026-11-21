@@ -9,7 +9,7 @@
  * Usage:
  *   npm run build && npm run preview          # serves on http://localhost:4173
  *   npm run test:e2e -- http://localhost:4173/ [screenshotDir]
- *   npm run test:e2e -- https://ahmad-muavia.github.io/digital-reversi/
+ *   npm run test:e2e -- https://digital-reversi.vercel.app/
  *
  * Set CHROME_PATH if Chrome/Edge is not in a standard location.
  * Needs Node 22+ (built-in fetch and WebSocket). Exit code 1 if any check fails.
@@ -32,6 +32,7 @@ function findBrowser() {
     'C:/Program Files/Google/Chrome/Application/chrome.exe',
     'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
     'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+    'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     '/usr/bin/google-chrome',
     '/usr/bin/chromium',
@@ -52,6 +53,8 @@ const browser = spawn(
     `--user-data-dir=${profile}`,
     '--no-first-run',
     '--no-default-browser-check',
+    // CI containers often cannot start Chrome's sandbox; only relax it there
+    ...(process.env.CI ? ['--no-sandbox'] : []),
     'about:blank',
   ],
   { stdio: 'ignore' },
@@ -203,7 +206,10 @@ check('page loads with title', (await evaluate('document.title')) === 'Digital R
 check('landing page with opening board preview', await evaluate(`!!document.querySelector('h1') && document.querySelectorAll('[role=grid] [data-testid=disc]').length === 4`))
 await evaluate(`__btn('Start game').click(); true`)
 await waitFor(`!!document.querySelector('form[aria-labelledby=setup-title]')`)
-check('setup form shown', true)
+check(
+  'setup form shown with both name fields and session lengths',
+  await evaluate(`!!__label('Player A name') && !!__label('Player B name') && document.querySelectorAll('input[name=length]').length === 3`),
+)
 await shot('01-setup-desktop')
 
 // ---------- 2. Setup validation, then Human vs Human known game ----------
@@ -269,7 +275,7 @@ while (!(await evaluate(`__status().startsWith('Game over')`)) && guard++ < 80) 
   if (humanTurn) {
     const n = await evaluate(`__legal().length`)
     if (n === 0) throw new Error('human turn with no legal moves shown')
-    // Measure main-thread responsiveness while the computer thinks
+    // Measure how long the computer takes to reply (including the display delay)
     await evaluate(`__legal()[0].click(); true`)
     const t0 = Date.now()
     await waitFor(`__status().includes('Tester to move') || __status().startsWith('Game over')`, 20000, 'computer reply')
@@ -300,12 +306,6 @@ await sleep(300)
 const overflow320 = await evaluate(`document.documentElement.scrollWidth - document.documentElement.clientWidth`)
 check('no horizontal scroll at 320px wide', overflow320 <= 0, `overflow ${overflow320}px`)
 await shot('05-mobile-320')
-
-// ---------- 7. Dark mode ----------
-await setViewport(1280, 1000)
-await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] })
-await sleep(300)
-await shot('06-dark')
 
 check('no console errors or warnings', consoleErrors.length === 0, consoleErrors.join(' | '))
 check('no uncaught exceptions', exceptions.length === 0, exceptions.join(' | '))

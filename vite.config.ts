@@ -4,8 +4,8 @@ import { defineConfig } from 'vitest/config'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // Relative asset paths so the build works at any URL, including the
-  // GitHub Pages sub-path https://<user>.github.io/digital-reversi/
+  // Relative asset paths so the build works at any URL: the Vercel site root,
+  // PR preview links, or a sub-path on another static host
   base: './',
   test: {
     environment: 'jsdom',

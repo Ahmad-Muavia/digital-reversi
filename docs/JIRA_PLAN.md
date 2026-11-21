@@ -324,6 +324,11 @@ together; regression suite green.
 - **Testing evidence:** build served from a `/digital-reversi/` sub-path
   locally — all assets HTTP 200. Requires Settings → Pages → Source:
   GitHub Actions.
+- **Later change (test-suite review):** GitHub Pages was never switched on, so
+  the deploy workflow failed and the Pages URL returned 404. The team hosts the
+  game on **Vercel** instead (https://digital-reversi.vercel.app; production
+  from `main`, a preview link per PR). `deploy.yml` was removed. Real-browser
+  check against the Vercel site: 28/28.
 
 ### Story 4.5: Documentation  (Epic E7)
 

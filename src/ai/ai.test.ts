@@ -9,17 +9,8 @@ import {
   positionLabel,
 } from '../game'
 import type { Difficulty, Disc, GameState } from '../game'
-import { boardFromRows } from '../game/testUtils'
+import { boardFromRows, seeded } from '../game/testUtils'
 import { chooseMove, evaluate } from './ai'
-
-/** Small deterministic PRNG so tests are repeatable. */
-function seeded(seed: number) {
-  let s = seed >>> 0
-  return () => {
-    s = (s * 1664525 + 1013904223) >>> 0
-    return s / 2 ** 32
-  }
-}
 
 function playGame(
   black: (state: GameState) => ReturnType<typeof chooseMove>,
@@ -52,7 +43,7 @@ describe('chooseMove', () => {
     }
   })
 
-  it('plays the only legal move without searching', () => {
+  it.each<Difficulty>(['easy', 'medium', 'hard'])('plays the only legal move on %s', (difficulty) => {
     const board = boardFromRows([
       'BW......',
       '........',
@@ -63,7 +54,7 @@ describe('chooseMove', () => {
       '........',
       '........',
     ])
-    expect(chooseMove(board, 'black', 'hard')).toEqual({ row: 0, col: 2 })
+    expect(chooseMove(board, 'black', difficulty, seeded(1))).toEqual({ row: 0, col: 2 })
   })
 
   it('easy picks different moves depending on chance', () => {
@@ -90,7 +81,7 @@ describe('chooseMove', () => {
     expect(positionLabel(chooseMove(board, 'black', 'hard', seeded(7))!)).toBe('a1')
   })
 
-  it.each<Difficulty>(['medium'])('%s takes an available corner', (difficulty) => {
+  it('medium takes an available corner', () => {
     // Black can take the a1 corner (capturing b2) among other moves.
     const board = boardFromRows([
       '..W.....',
@@ -104,7 +95,7 @@ describe('chooseMove', () => {
     ])
     const moves = getLegalMoves(board, 'black').map(positionLabel)
     expect(moves).toContain('a1')
-    expect(positionLabel(chooseMove(board, 'black', difficulty, seeded(7))!)).toBe('a1')
+    expect(positionLabel(chooseMove(board, 'black', 'medium', seeded(7))!)).toBe('a1')
   })
 
   it('hard avoids giving away a corner when a safe move exists', () => {
